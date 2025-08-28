@@ -8,7 +8,9 @@ version = "0.1.0"
 dependencies = [
  "arboard",
  "eframe",
+ "once_cell",
  "tray-icon",
+ "winit",
 ]
 
 [[package]]
