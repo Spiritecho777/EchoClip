@@ -1,42 +1,31 @@
-use once_cell::sync::OnceCell;
-use tray_icon::{TrayIconBuilder, menu::{Menu, MenuItemBuilder, MenuEvent}, Icon, TrayIcon};
-use std::sync::mpsc::{Sender, channel};
+/*use tray_icon::{TrayIconBuilder, Icon, TrayIcon,
+                menu::{Menu, MenuItem, MenuEvent},
+};
+use std::sync::mpsc::Sender;
 
 pub fn init_tray(tx: Sender<()>) -> TrayIcon {
-    // On "leak" les MenuItem pour qu'ils vivent 'static
-    let show_item = Box::leak(Box::new(MenuItemBuilder::new().text("Afficher").build()));
-    let quit_item = Box::leak(Box::new(MenuItemBuilder::new().text("Quitter").build()));
+    let mut menu = Menu::new();
+    let show = MenuItem::new("Afficher", true, None);
+    let quit =  MenuItem::new("Quitter", true, None);
+    menu.append(&show).unwrap();
+    menu.append(&quit).unwrap();
 
-    let show_id = show_item.id();
-    let quit_id = quit_item.id();
+    let icon_data = vec![255u8,0,0,255].repeat(16*16);
+    let icon = Icon::from_rgba(icon_data,16,16).unwrap();
 
-    let menu = Menu::new();
-    menu.append(show_item);
-    menu.append(quit_item);
-
-    //let icon_data = vec![0u8; 16 * 16 * 4];
-    //let icon = Icon::from_rgba(icon_data, 16, 16).unwrap();
-    let mut icon_data = Vec::new();
-    for _ in 0..(16 * 16) {
-        icon_data.extend_from_slice(&[255, 0, 0, 255]); // rouge opaque
-    }
-    let icon = Icon::from_rgba(icon_data, 16, 16).unwrap();
-
-    let tray = TrayIconBuilder::new()
+    let tray= TrayIconBuilder::new()
         .with_icon(icon)
-        .with_tooltip("Clipboard Manager")
         .with_menu(Box::new(menu))
-        //.with_menu_on_left_click(true)
+        .with_menu_on_left_click(false)
         .build()
         .unwrap();
 
-    //TRAY.set(_tray).ok();
+    let show_id = show.id().clone();
+    let quit_id = quit.id().clone();
 
-    let rx = MenuEvent::receiver();
     std::thread::spawn(move || {
-        for event in rx {
+        for event in  MenuEvent::receiver(){
             if event.id == show_id {
-                println!("UI demo !");
                 tx.send(()).unwrap();
             } else if event.id == quit_id {
                 std::process::exit(0);
@@ -45,4 +34,64 @@ pub fn init_tray(tx: Sender<()>) -> TrayIcon {
     });
 
     tray
+}*/
+
+//mod ui;
+use tray_icon::{
+    TrayIconBuilder, Icon,
+    menu::{Menu, MenuItem, MenuEvent},
+    TrayIconEvent,
+};
+use winit::{
+    event_loop::{EventLoop, ControlFlow},
+};
+use std::sync::{Arc, Mutex, mpsc::Sender};
+
+
+pub fn init_tray(history: Arc<Mutex<Vec<String>>>, tx: Sender<()>) {
+    // Menu
+    let mut menu = Menu::new();
+    let show = MenuItem::new("Afficher", true, None);
+    let quit = MenuItem::new("Quitter", true, None);
+    menu.append(&show).unwrap();
+    menu.append(&quit).unwrap();
+
+    let icon_data = vec![255u8, 0, 0, 255].repeat(16*16);
+    let icon = Icon::from_rgba(icon_data, 16, 16).unwrap();
+
+    // EventLoop Winit
+    let event_loop = EventLoop::<()>::with_user_event().build().unwrap();
+    let proxy = event_loop.create_proxy();
+
+    // Gestion MenuEvent
+    MenuEvent::set_event_handler(Some(move |event| {
+        let _ = proxy.send_event(());
+    }));
+
+    // Crée TrayIcon
+    let _tray_icon = TrayIconBuilder::new()
+        .with_icon(icon)
+        .with_tooltip("Historique Presse-papiers")
+        .with_menu(Box::new(menu))
+        .with_menu_on_left_click(false)
+        .build()
+        .unwrap();
+
+    let show_id = show.id().clone();
+    let quit_id = quit.id().clone();
+    let history_clone = history.clone();
+    // Thread Winit pour message loop
+    //std::thread::spawn(move || {
+        event_loop.run(move |event, target | {
+            target.set_control_flow(ControlFlow::Wait);
+
+            if let winit::event::Event::UserEvent(_) = event {
+                // On déclenche l'UI quand le menu est cliqué
+                //ui::show_ui(history_clone.clone());
+                tx.send(()).unwrap();
+            }
+        });
+    //});
 }
+
+

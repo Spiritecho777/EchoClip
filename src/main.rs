@@ -13,11 +13,14 @@ fn main() {
     let (tx, rx) = mpsc::channel();
 
     // Initialise le systray et garde l'icône en vie
-    let _tray = systray::init_tray(tx);
+    let _tray = systray::init_tray(history.clone(),tx.clone());
 
     // Boucle principale pour afficher l'UI
-    for _ in rx {
+    /*for _ in rx {
         println!("UI demandée !");
         ui::show_ui(history.clone());
+    }*/
+    loop {
+        std::thread::sleep(std::time::Duration::from_secs(1));
     }
 }
