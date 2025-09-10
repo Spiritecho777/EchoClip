@@ -1,58 +1,15 @@
-/*use tray_icon::{TrayIconBuilder, Icon, TrayIcon,
-                menu::{Menu, MenuItem, MenuEvent},
-};
-use std::sync::mpsc::Sender;
+use tray_icon::{TrayIconBuilder, Icon, menu::{Menu, MenuItem, MenuEvent}, };
+use winit::{event_loop::{EventLoop, ControlFlow}, platform::windows::EventLoopBuilderExtWindows };
+use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
+use winit::event::Event;
+use winit::event_loop::ActiveEventLoop;
 
-pub fn init_tray(tx: Sender<()>) -> TrayIcon {
-    let mut menu = Menu::new();
-    let show = MenuItem::new("Afficher", true, None);
-    let quit =  MenuItem::new("Quitter", true, None);
-    menu.append(&show).unwrap();
-    menu.append(&quit).unwrap();
-
-    let icon_data = vec![255u8,0,0,255].repeat(16*16);
-    let icon = Icon::from_rgba(icon_data,16,16).unwrap();
-
-    let tray= TrayIconBuilder::new()
-        .with_icon(icon)
-        .with_menu(Box::new(menu))
-        .with_menu_on_left_click(false)
-        .build()
-        .unwrap();
-
-    let show_id = show.id().clone();
-    let quit_id = quit.id().clone();
-
-    std::thread::spawn(move || {
-        for event in  MenuEvent::receiver(){
-            if event.id == show_id {
-                tx.send(()).unwrap();
-            } else if event.id == quit_id {
-                std::process::exit(0);
-            }
-        }
-    });
-
-    tray
-}*/
-
-//mod ui;
-use tray_icon::{
-    TrayIconBuilder, Icon,
-    menu::{Menu, MenuItem, MenuEvent},
-    TrayIconEvent,
-};
-use winit::{
-    event_loop::{EventLoop, ControlFlow},
-};
-use std::sync::{Arc, Mutex, mpsc::Sender};
-
-
-pub fn init_tray(history: Arc<Mutex<Vec<String>>>, tx: Sender<()>) {
+pub fn init_tray(history: Arc<Mutex<Vec<String>>>, show_flag: Arc<AtomicBool>) {
     // Menu
     let mut menu = Menu::new();
     let show = MenuItem::new("Afficher", true, None);
     let quit = MenuItem::new("Quitter", true, None);
+
     menu.append(&show).unwrap();
     menu.append(&quit).unwrap();
 
@@ -60,12 +17,22 @@ pub fn init_tray(history: Arc<Mutex<Vec<String>>>, tx: Sender<()>) {
     let icon = Icon::from_rgba(icon_data, 16, 16).unwrap();
 
     // EventLoop Winit
-    let event_loop = EventLoop::<()>::with_user_event().build().unwrap();
+    let event_loop = EventLoop::<String>::with_user_event()
+        .with_any_thread(true)
+        .build()
+        .unwrap();
     let proxy = event_loop.create_proxy();
 
+    let show_id = show.id().clone();
+    let quit_id = quit.id().clone();
+
     // Gestion MenuEvent
-    MenuEvent::set_event_handler(Some(move |event| {
-        let _ = proxy.send_event(());
+    MenuEvent::set_event_handler(Some(move |event:MenuEvent| {
+        if event.id == show_id {
+            let _ = proxy.send_event("show".to_string());
+        } else if event.id == quit_id {
+            let _ = proxy.send_event("quit".to_string());
+        }
     }));
 
     // Crée TrayIcon
@@ -77,21 +44,23 @@ pub fn init_tray(history: Arc<Mutex<Vec<String>>>, tx: Sender<()>) {
         .build()
         .unwrap();
 
-    let show_id = show.id().clone();
-    let quit_id = quit.id().clone();
-    let history_clone = history.clone();
     // Thread Winit pour message loop
-    //std::thread::spawn(move || {
-        event_loop.run(move |event, target | {
-            target.set_control_flow(ControlFlow::Wait);
+    event_loop.run(move |event , target:&ActiveEventLoop | {
+        target.set_control_flow(ControlFlow::Wait);
 
-            if let winit::event::Event::UserEvent(_) = event {
-                // On déclenche l'UI quand le menu est cliqué
-                //ui::show_ui(history_clone.clone());
-                tx.send(()).unwrap();
+        if let winit::event::Event::UserEvent(msg) = event {
+            match msg.as_str() {
+                "show" => {
+                    println!("Show event received");
+                    show_flag.store(true,Ordering::SeqCst);
+                }
+                "quit" => {
+                    std::process::exit(0);
+                }
+                _ => {}
             }
-        });
-    //});
+        }
+    });
 }
 
 
