@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EchoClip"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
+        x:Class="EchoClip.MainWindow"
+        x:DataType="local:MainWindow"
+        Title="EchoClip" CanResize="True" ShowInTaskbar="False" 
+        Width="300" Height="400" >
+
+  <ListBox x:Name="ClipboardList" ItemsSource="{Binding ClipboardItems}">
+    <ListBox.ItemTemplate>
+      <DataTemplate>
+        <Border Margin="4" Padding="6" CornerRadius="4" PointerPressed="OnClipboardItemClick" >
+          <StackPanel>
+            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="14"/>
+            <TextBlock Text="{Binding Timestamp}" FontSize="10" Foreground="Gray"/>
+          </StackPanel>
+        </Border>
+      </DataTemplate>
+    </ListBox.ItemTemplate>
+  </ListBox>
+</Window>
