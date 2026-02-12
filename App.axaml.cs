@@ -1,9 +1,11 @@
-using EchoClip;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform;
+using EchoClip;
 using System;
+using System.Linq;
 
 namespace EchoClip
 {
@@ -18,8 +20,12 @@ namespace EchoClip
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                bool trayMode = Environment.GetCommandLineArgs().Contains("--tray");
                 var main = new MainWindow();
-                main.Hide();
+                if (trayMode) 
+                    main.Hide();
+                else 
+                    desktop.MainWindow = main;
 
                 var showItem = new NativeMenuItem("Afficher");
                 showItem.Click += (_, _) =>
@@ -38,9 +44,10 @@ namespace EchoClip
                 trayMenu.Items.Add( new NativeMenuItemSeparator());
                 trayMenu.Items.Add(quitItem);
 
+                var iconStream = AssetLoader.Open(new Uri("avares://EchoClip/Asset/Icone.png"));
                 var trayIcon = new TrayIcon
                 {
-                    Icon = new WindowIcon("Assets/icon.png"),
+                    Icon = new WindowIcon(iconStream),
                     IsVisible = true,
                     Menu = trayMenu
                 };

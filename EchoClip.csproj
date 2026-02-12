@@ -7,8 +7,26 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">	
+	<SelfContained>true</SelfContained>
+	<PublishSingleFile>true</PublishSingleFile>
+	<PublishTrimmed>true</PublishTrimmed>
+	<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+  
+    <PropertyGroup> 
+	<Version>1.0.0</Version> 
+	<AssemblyVersion>1.0.0.0</AssemblyVersion> 
+	<FileVersion>1.0.0.0</FileVersion> 
+	<InformationalVersion>1.0.0</InformationalVersion> 
+	<ApplicationIcon>Asset\Icone.ico</ApplicationIcon> 
+  </PropertyGroup>
+
   <ItemGroup>
-    <None Remove="Assets\icon.png" />
+    <AvaloniaResource Include="Asset\Icone.png" />
+	<AvaloniaResource Include="Asset\Icone.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,9 +41,14 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Assets\icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <Content Include="Asset\Icone.ico" />
+	<Content Include="Asset\install.sh" Link="install.sh">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content>
+	<Content Include="Asset\Icone.png" Link="Icone.png">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</Content>
   </ItemGroup>
+  
 </Project>

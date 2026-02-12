@@ -3,22 +3,53 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EchoClip"
+        xmlns:conv="clr-namespace:EchoClip.Converter"
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
         x:Class="EchoClip.MainWindow"
         x:DataType="local:MainWindow"
         Title="EchoClip" CanResize="True" ShowInTaskbar="False" 
         Width="300" Height="400" >
 
-  <ListBox x:Name="ClipboardList" ItemsSource="{Binding ClipboardItems}">
-    <ListBox.ItemTemplate>
-      <DataTemplate>
-        <Border Margin="4" Padding="6" CornerRadius="4" PointerPressed="OnClipboardItemClick" >
-          <StackPanel>
-            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" FontSize="14"/>
-            <TextBlock Text="{Binding Timestamp}" FontSize="10" Foreground="Gray"/>
-          </StackPanel>
-        </Border>
-      </DataTemplate>
-    </ListBox.ItemTemplate>
-  </ListBox>
+    <Window.Resources> 
+        <conv:ClipboardIconConverter x:Key="ClipboardIconConverter"/> 
+        <conv:TextVisibleConverter x:Key="TextVisibleConverter"/> 
+        <conv:ImageVisibleConverter x:Key="ImageVisibleConverter"/> 
+    </Window.Resources> 
+
+    <ListBox x:Name="ClipboardList" ItemsSource="{Binding ClipboardItems}">
+        <ListBox.ItemTemplate> 
+            <DataTemplate> 
+                <Border Margin="4" Padding="6" CornerRadius="4" PointerPressed="OnClipboardItemClick"> 
+                    <StackPanel Orientation="Horizontal" Spacing="8"> 
+                        <!-- Icône --> 
+                        <TextBlock FontSize="18" VerticalAlignment="Top" 
+                                   Text="{Binding ClipboardType, Converter={StaticResource ClipboardIconConverter}}"/> 
+                        <!-- Contenu --> 
+                        <StackPanel>
+
+                            <!-- Texte --> 
+                            <TextBlock Text="{Binding Content}" 
+                                       TextWrapping="Wrap" 
+                                       FontSize="14" 
+                                       IsVisible="{Binding ClipboardType, 
+                                       Converter={StaticResource TextVisibleConverter}}"/> 
+                            <!-- Image --> 
+                            <Image Source="{Binding Image}" 
+                                   Width="120" 
+                                   Height="120" 
+                                   Stretch="Uniform" 
+                                   IsVisible="{Binding ClipboardType, 
+                                   Converter={StaticResource ImageVisibleConverter}}"/> 
+                        
+                            <TextBlock Text="{Binding Timestamp}" 
+                                       FontSize="10" 
+                                       Foreground="Gray"/> 
+                        </StackPanel>
+
+                    </StackPanel> 
+                </Border> 
+            </DataTemplate> 
+        </ListBox.ItemTemplate> 
+    </ListBox>
+
 </Window>
