@@ -16,5 +16,25 @@ namespace EchoClip.Classe
         public ClipboardType ClipboardType { get; set; }
         public Bitmap? Image { get; set; }
         public string? ImageHashKey { get; set; }
+
+        public string Preview
+        {
+            get
+            {
+                if (ClipboardType == ClipboardType.Image) 
+                    return "[Image]";
+
+                if (string.IsNullOrEmpty(Content)) 
+                    return ""; 
+
+                return ClipboardType switch 
+                { 
+                    ClipboardType.Link => Content.Length > 80 ? Content[..80] + "..." : Content, 
+                    ClipboardType.Text => Content.Length > 120 ? Content[..120] + "..." : Content, 
+                    _ => Content 
+                };
+
+            }
+        }
     }
 }

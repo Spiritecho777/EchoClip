@@ -18,14 +18,11 @@ namespace EchoClip
 
         public override void OnFrameworkInitializationCompleted()
         {
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                bool trayMode = Environment.GetCommandLineArgs().Contains("--tray");
                 var main = new MainWindow();
-                if (trayMode) 
-                    main.Hide();
-                else 
-                    desktop.MainWindow = main;
+                main.Hide();
 
                 var showItem = new NativeMenuItem("Afficher");
                 showItem.Click += (_, _) =>
@@ -50,6 +47,14 @@ namespace EchoClip
                     Icon = new WindowIcon(iconStream),
                     IsVisible = true,
                     Menu = trayMenu
+                };
+
+                trayIcon.Clicked += (_, _) =>
+                {
+                    if (main?.IsVisible != true)
+                        main?.Show();
+                    else
+                        main?.Activate();
                 };
             }
 

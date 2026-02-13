@@ -28,7 +28,7 @@
                         <StackPanel>
 
                             <!-- Texte --> 
-                            <TextBlock Text="{Binding Content}" 
+                            <TextBlock Text="{Binding Preview}" 
                                        TextWrapping="Wrap" 
                                        FontSize="14" 
                                        IsVisible="{Binding ClipboardType, 

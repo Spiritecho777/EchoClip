@@ -104,6 +104,13 @@ namespace EchoClip
                                 Content = text,
                                 Timestamp = DateTime.Now
                             });
+
+                            const int MaxTexte = 100000;
+                            var texte = ClipboardItems.Where(i => i.ClipboardType == ClipboardType.Text).ToList();
+                            if (texte.Count > MaxTexte)
+                            {
+                                ClipboardItems.Remove(texte.Last());
+                            }
                         }
                     }
                 });
