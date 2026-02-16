@@ -20,29 +20,20 @@ sudo ln -sf "$INSTALL_DIR/$APP_NAME" "$BIN_DIR/$APP_NAME"
 sudo mkdir -p "$ICON_DIR"
 sudo cp Icone.png "$ICON_DIR/$APP_NAME.png"
 
-# Fichier desktop normal (menu applications) 
-sudo tee "$DESKTOP_FILE" > /dev/null <<EOF 
-[Desktop Entry] 
-Name=$APP_NAME 
-Exec=$APP_NAME 
-Icon=$APP_NAME 
-Type=Application 
-Categories=Utility; 
-StartupNotify=true 
-EOF
-
 # Fichier autostart (systray) 
 mkdir -p "$AUTOSTART_DIR" 
 tee "$AUTOSTART_FILE" > /dev/null <<EOF 
-[Desktop Entry] 
-Type=Application 
-Exec=$APP_NAME --tray 
-Hidden=false 
-NoDisplay=false 
-X-GNOME-Autostart-enabled=true 
-Name=$APP_NAME 
-Comment=Lance EchoClip en systray au démarrage 
+[Desktop Entry]
+Type=Application
+Exec=$EXECUTABLE --tray
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=$APP_NAME
+Comment=Lance EchoClip en systray au démarrage
 EOF
+
+chmod +x "$AUTOSTART_FILE"
 
 sudo cp "$DESKTOP_FILE" ../$APP_NAME.desktop
 sudo chmod +x ../$APP_NAME.desktop
