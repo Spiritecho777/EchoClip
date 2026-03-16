@@ -37,6 +37,7 @@ namespace EchoClip
             {
                 Dispatcher.UIThread.Post(async () =>
                 {
+                try {
                     var clipboard = TopLevel.GetTopLevel(this)?.Clipboard;
                     if (clipboard == null) return;
                     if (_isPasting) return;
@@ -77,9 +78,9 @@ namespace EchoClip
                                     Timestamp = DateTime.Now
                                 });
 
-                                const int MaxImages = 100; 
-                                var images = ClipboardItems.Where(i => i.ClipboardType == ClipboardType.Image).ToList(); 
-                                if (images.Count > MaxImages) 
+                                const int MaxImages = 100;
+                                var images = ClipboardItems.Where(i => i.ClipboardType == ClipboardType.Image).ToList();
+                                if (images.Count > MaxImages)
                                 {
                                     var toRemove = images.Last();
                                     ClipboardItems.Remove(toRemove);
@@ -115,7 +116,14 @@ namespace EchoClip
                             }
                         }
                     }
-                });
+                }catch (TimeoutException)
+                {
+
+                }catch (Exception ex)
+                {
+                        System.Diagnostics.Debug.WriteLine($"Clipboard error:{ex.Message}");
+                }
+            });
 
             }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(500));
         }
