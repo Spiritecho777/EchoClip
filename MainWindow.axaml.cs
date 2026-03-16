@@ -19,7 +19,7 @@ namespace EchoClip
     {
         private string? lastclipboardText;
         private Timer? clipboardTimer;
-        private bool _isPasting = false;
+        private volatile bool _isPasting = false;
 
         public ObservableCollection<ClipboardItem> ClipboardItems { get; } = new();
         public MainWindow()
@@ -27,7 +27,7 @@ namespace EchoClip
             InitializeComponent();
             DataContext = this;
             Closing += OnClosing;
-            ClipboardList.PointerPressed += OnClipboardItemClick;
+            //ClipboardList.PointerPressed += OnClipboardItemClick;
             StartClipboardWatcher();
         }
 
@@ -80,8 +80,10 @@ namespace EchoClip
                                 const int MaxImages = 100; 
                                 var images = ClipboardItems.Where(i => i.ClipboardType == ClipboardType.Image).ToList(); 
                                 if (images.Count > MaxImages) 
-                                { 
-                                    ClipboardItems.Remove(images.Last());
+                                {
+                                    var toRemove = images.Last();
+                                    ClipboardItems.Remove(toRemove);
+                                    toRemove.Dispose();
                                 }
                             }
                         }

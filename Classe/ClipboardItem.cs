@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace EchoClip.Classe
 {
     public enum ClipboardType { Text,Image,Link}
-    public class ClipboardItem
+    public class ClipboardItem : IDisposable
     {
         public string? Content { get; set; }
         public DateTime Timestamp { get; set; }
@@ -35,6 +35,12 @@ namespace EchoClip.Classe
                 };
 
             }
+        }
+
+        public void Dispose()
+        {
+            Image?.Dispose();
+            Image = null;
         }
     }
 }
